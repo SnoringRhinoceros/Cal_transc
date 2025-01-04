@@ -19,16 +19,10 @@ def parse_annotations(filepath):
     return np.array(annotations)
 
 def normalize_boxes(boxes, image_shape):
-    """
-    Normalize bounding box coordinates relative to the image dimensions.
-    """
     h, w = image_shape[:2]
     return boxes / np.array([w, h, w, h])
 
 def create_mask(image_shape, boxes):
-    """
-    Create a binary mask from bounding boxes.
-    """
     mask = np.zeros(image_shape[:2], dtype=np.uint8)
     for (x1, y1, x2, y2) in boxes:
         x1, y1, x2, y2 = map(int, [x1, y1, x2, y2])
@@ -36,7 +30,14 @@ def create_mask(image_shape, boxes):
     return mask
 
 def preprocess_image(image, target_size=(512, 512)):
-    """
-    Resize an image to the target size.
-    """
     return cv2.resize(image, target_size, interpolation=cv2.INTER_LINEAR)
+
+def apply_canny(image, lower_threshold=50, upper_threshold=150):
+    gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    edges = cv2.Canny(gray_image, lower_threshold, upper_threshold)
+    return edges
+
+def preprocess_with_canny(input_path, output_path):
+    image = cv2.imread(input_path)
+    edges = apply_canny(image)
+    cv2.imwrite(output_path, edges)
